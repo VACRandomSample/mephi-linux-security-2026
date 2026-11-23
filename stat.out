@@ -1,0 +1,24 @@
+  File: /home/user1
+  Size: 4096      	Blocks: 8          IO Block: 4096   directory
+Device: 8,64	Inode: 49215       Links: 3
+Access: (0750/drwxr-x---)  Uid: ( 1234/   user1)   Gid: ( 1234/   user1)
+Access: 2026-11-23 15:25:39.778782710 +0300
+Modify: 2026-11-23 15:26:02.602781615 +0300
+Change: 2026-11-23 15:26:02.602781615 +0300
+ Birth: 2026-11-23 15:21:59.862781462 +0300
+  File: /home/user1/mephi-bin/stat-suid
+  Size: 88592     	Blocks: 176        IO Block: 4096   regular file
+Device: 8,64	Inode: 49263       Links: 1
+Access: (4750/-rwsr-x---)  Uid: (    0/    root)   Gid: ( 1234/   user1)
+Access: 2026-11-23 15:26:02.670781616 +0300
+Modify: 2026-11-23 15:26:02.618364015 +0300
+Change: 2026-11-23 15:26:02.662781616 +0300
+ Birth: 2026-11-23 15:26:02.614781615 +0300
+  File: /home/user1/mephi-bin/ping-cap
+  Size: 89800     	Blocks: 176        IO Block: 4096   regular file
+Device: 8,64	Inode: 49283       Links: 1
+Access: (0750/-rwxr-x---)  Uid: (    0/    root)   Gid: ( 1234/   user1)
+Access: 2026-11-23 15:26:02.726781616 +0300
+Modify: 2026-11-23 15:26:02.688550016 +0300
+Change: 2026-11-23 15:26:02.706781616 +0300
+ Birth: 2026-11-23 15:26:02.682781616 +0300

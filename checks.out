@@ -1,0 +1,106 @@
+== set-UID: копия stat ==
+-- до установки бита (ожидаем отказ):
+/home/user1/mephi-bin/stat-suid: cannot statx '/var/lib/mephi-zos/proof.txt': Permission denied
+RC=1
+-- после chmod 4750:
+  File: /var/lib/mephi-zos/proof.txt
+  Size: 0         	Blocks: 0          IO Block: 4096   regular empty file
+Device: 8,64	Inode: 49262       Links: 1
+Access: (0600/-rw-------)  Uid: (    0/    root)   Gid: (    0/    root)
+Access: 2026-11-23 15:26:02.610781615 +0300
+Modify: 2026-11-23 15:26:02.610781615 +0300
+Change: 2026-11-23 15:26:02.613836715 +0300
+ Birth: 2026-11-23 15:26:02.610781615 +0300
+RC=0
+4750 root:user1 /home/user1/mephi-bin/stat-suid
+
+== capabilities: копия ping ==
+-- getcap до:
+-- запуск до setcap (ожидаем отказ RAW-сокета):
+/home/user1/mephi-bin/ping-cap: socktype: SOCK_RAW
+/home/user1/mephi-bin/ping-cap: socket: Operation not permitted
+/home/user1/mephi-bin/ping-cap: => missing cap_net_raw+p capability or setuid?
+RC=2
+-- getcap после:
+/home/user1/mephi-bin/ping-cap cap_net_raw=ep
+-- запуск после setcap (без конвейера):
+PING 127.0.0.1 (127.0.0.1) 56(84) bytes of data.
+64 bytes from 127.0.0.1: icmp_seq=1 ttl=64 time=0.165 ms
+
+--- 127.0.0.1 ping statistics ---
+1 packets transmitted, 1 received, 0% packet loss, time 0ms
+rtt min/avg/max/mdev = 0.165/0.165/0.165/0.000 ms
+RC=0
+750 root:user1 /home/user1/mephi-bin/ping-cap
+
+== sudo и системное время ==
+-- правило (0440):
+user1 ALL=(root) /usr/bin/date [0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9].[0-9][0-9]
+-- числовой аргумент MMDDhhmmYYYY.ss разрешён:
+/usr/bin/date 112315262026.25
+RC=0
+-- --file=/dev/null отклоняется:
+RC=1
+
+== интерактивные проверки от user1 (пароль вводил студент в видимом терминале) ==
+-- passwd от user1: текущий пароль принят, ввод остановлен на запросе нового пароля; в этот момент снят ps (строка в euid-root-processes.out):
+PID RUID EUID COMMAND
+    335  1234     0 passwd
+-- смена пароля прервана без сохранения (Ctrl+C не прерывает PAM-чтение в PTY — процесс завершён из корневого сеанса):
+New password: Killed
+-- установка времени от user1 через правило sudo:
+$ sudo -- /usr/bin/date 112315482026.14
+[sudo] password for user1:
+Mon Nov 23 15:48:14 MSK 2026
+RC=0
+-- date сразу после (root): 2026-11-23 15:58:38 MSK
+
+== проверки после перезапуска WSL (2026-11-23 15:59:24 MSK) ==
+-- id user1:
+uid=1234(user1) gid=1234(user1) groups=1234(user1),1000(students)
+-- chage -l user1:
+Last password change					: Nov 23, 2026
+Password expires					: Feb 21, 2027
+Password inactive					: never
+Account expires						: never
+Minimum number of days between password change		: 0
+Maximum number of days between password change		: 90
+Number of days of warning before password expires	: 7
+-- stat-suid от user1:
+  File: /var/lib/mephi-zos/proof.txt
+  Size: 0         	Blocks: 0          IO Block: 4096   regular empty file
+Device: 8,64	Inode: 49262       Links: 1
+Access: (0600/-rw-------)  Uid: (    0/    root)   Gid: (    0/    root)
+Access: 2026-11-23 15:26:02.610781615 +0300
+Modify: 2026-11-23 15:26:02.610781615 +0300
+Change: 2026-11-23 15:26:02.613836715 +0300
+ Birth: 2026-11-23 15:26:02.610781615 +0300
+RC=0
+-- ping-cap от user1 (без конвейера):
+PING 127.0.0.1 (127.0.0.1) 56(84) bytes of data.
+64 bytes from 127.0.0.1: icmp_seq=1 ttl=64 time=0.265 ms
+
+--- 127.0.0.1 ping statistics ---
+1 packets transmitted, 1 received, 0% packet loss, time 0ms
+rtt min/avg/max/mdev = 0.265/0.265/0.265/0.000 ms
+RC=0
+-- getcap:
+/home/user1/mephi-bin/ping-cap cap_net_raw=ep
+-- sudo: числовой аргумент:
+/usr/bin/date 112315592026.24
+RC=0
+-- sudo: --file=/dev/null:
+RC=1
+
+== интерактивные проверки от user1 в bash-сеансе (HISTFILE=/home/user1/.hist-dz, пароль вводил студент) ==
+-- passwd от user1: текущий пароль принят, остановка на запросе нового; ps в этот момент:
+PID RUID EUID COMMAND
+     74  1234     0 passwd
+-- прерывание без сохранения (Ctrl+C не прерывает PAM-чтение в PTY — завершено из корневого сеанса):
+New password: Killed
+-- установка времени от user1 через правило sudo:
+$ sudo -- /usr/bin/date 112316032026.31
+[sudo] password for user1:
+Mon Nov 23 16:03:31 MSK 2026
+RC=0
+-- date сразу после: 2026-11-23 16:05:27 MSK
